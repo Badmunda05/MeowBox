@@ -128,6 +128,4 @@ Class with `.upload()` and `.upload_async()` methods.
 
 ## Links
 
-- 🌐 Site: [files.tgvibes.online](https://files.tgvibes.online)
 - 💬 Telegram: [@BadmundaXd](https://t.me/BadmundaXd)
-- 📦 Repo: [github.com/Badmunda05/MeowBox](https://github.com/Badmunda05/MeowBox)
