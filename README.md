@@ -129,3 +129,6 @@ Class with `.upload()` and `.upload_async()` methods.
 ## Links
 
 - 💬 Telegram: [@BadmundaXd](https://t.me/BadmundaXd)
+
+[![Telegram Group](https://img.shields.io/badge/Telegram-Group-white?&style=social&logo=telegram)](https://t.me/PBXCHATS)
+[![Telegram Channel](https://img.shields.io/badge/Telegram-Channel-white?&style=social&logo=telegram)](https://t.me/PBX_UPDATE)
