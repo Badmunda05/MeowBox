@@ -1,13 +1,14 @@
-# MeowBox Python Library 📦
+# meowbox
 
-> **Permanent file hosting — files never expire.**
-> By [@BadmundaXd](https://t.me/BadmundaXd) | [GitHub](https://github.com/Badmunda05/MeowBox)
+> permanent file hosting — files never expire.
+> by [badmunda](https://t.me/BadmundaXd) · [github](https://github.com/Badmunda05/MeowBox)
 
-Python library for uploading files to [MeowBox](https://files.tgvibes.online) — supports both sync and async.
+a python library for uploading files to [meowbox](https://files.tgvibes.online).
+supports both sync and async out of the box.
 
 ---
 
-## Install
+## install
 
 ```bash
 pip install meowbox
@@ -15,9 +16,10 @@ pip install meowbox
 
 ---
 
-## Quick Start
+## how to use
 
-### Sync upload
+### basic sync upload
+
 ```python
 from meowbox import upload
 
@@ -26,7 +28,8 @@ print(urls[0])
 # https://files.tgvibes.online/AbCdEfGh.jpg
 ```
 
-### Async upload (httpx)
+### async upload
+
 ```python
 from meowbox import upload_async
 
@@ -34,20 +37,22 @@ urls = await upload_async("photo.jpg")
 print(urls[0])
 ```
 
-### Class-based
+### class-based usage
+
 ```python
 from meowbox import MeowBox
 
 mb = MeowBox()
 
-# Sync
+# sync
 urls = mb.upload("photo.jpg")
 
-# Async
+# async
 urls = await mb.upload_async("photo.jpg")
 ```
 
-### Upload multiple files
+### upload multiple files
+
 ```python
 from meowbox import upload
 
@@ -56,7 +61,8 @@ for url in urls:
     print(url)
 ```
 
-### Upload file object (e.g. Telegram Bot)
+### upload from a file object
+
 ```python
 from meowbox import upload_async
 
@@ -67,7 +73,7 @@ await message.reply(urls[0])
 
 ---
 
-## Telegram Bot Example
+## telegram bot example
 
 ```python
 from meowbox import upload_async
@@ -75,7 +81,7 @@ import os
 
 async def upload_handler(message):
     if not message.reply_to_message or not message.reply_to_message.media:
-        await message.reply("Reply to a file!")
+        await message.reply("reply to a file!")
         return
 
     path = await message.reply_to_message.download()
@@ -83,7 +89,7 @@ async def upload_handler(message):
         urls = await upload_async(path)
         await message.reply(f"✅ {urls[0]}")
     except Exception as e:
-        await message.reply(f"❌ Upload failed: {e}")
+        await message.reply(f"❌ upload failed: {e}")
     finally:
         if os.path.exists(path):
             os.remove(path)
@@ -91,13 +97,13 @@ async def upload_handler(message):
 
 ---
 
-## Exceptions
+## error handling
 
-| Exception | When |
+| exception | when |
 |-----------|------|
-| `UploadError` | Upload failed (server error) |
-| `RateLimitError` | Too many uploads |
-| `MeowBoxException` | Base exception |
+| `UploadError` | upload failed (server error) |
+| `RateLimitError` | too many requests |
+| `MeowBoxException` | base exception class |
 
 ```python
 from meowbox import upload
@@ -106,29 +112,24 @@ from meowbox.exceptions import UploadError, RateLimitError
 try:
     urls = upload("file.jpg")
 except RateLimitError as e:
-    print(f"Slow down! Retry after {e.retry_after}s")
+    print(f"slow down! retry after {e.retry_after}s")
 except UploadError as e:
-    print(f"Upload failed: {e}")
+    print(f"upload failed: {e}")
 ```
 
 ---
 
-## API Reference
+## api reference
 
-### `upload(f, base_url=...) -> list[str]`
-Sync upload. `f` = path, file object, or list of either.
-
-### `upload_async(f, base_url=...) -> list[str]`
-Async upload using httpx.
-
-### `MeowBox(base_url=...)`
-Class with `.upload()` and `.upload_async()` methods.
+| method | description |
+|--------|-------------|
+| `upload(f, base_url=...)` | sync upload — accepts path, file object, or list |
+| `upload_async(f, base_url=...)` | async upload using httpx |
+| `MeowBox(base_url=...)` | class with `.upload()` and `.upload_async()` methods |
 
 ---
 
-## Links
+## links
 
-- 💬 Telegram: [@BadmundaXd](https://t.me/BadmundaXd)
-
-[![Telegram Group](https://img.shields.io/badge/Telegram-Group-white?&style=social&logo=telegram)](https://t.me/PBXCHATS)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-Channel-white?&style=social&logo=telegram)](https://t.me/PBX_UPDATE)
+[![telegram](https://img.shields.io/badge/telegram-group-white?style=social&logo=telegram)](https://t.me/PBXCHATS)
+[![channel](https://img.shields.io/badge/telegram-channel-white?style=social&logo=telegram)](https://t.me/PBX_UPDATE)
