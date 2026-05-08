@@ -15,7 +15,7 @@ Async:
     urls = await mb.upload_async("photo.jpg")
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__  = "@BadmundaXd"
 __repo__    = "https://github.com/Badmunda05/MeowBox"
 
