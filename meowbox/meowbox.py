@@ -111,3 +111,4 @@ def upload(f, base_url: str = MEOWBOX_URL) -> list:
             urls.append(file_info["url"])
 
     return urls
+    
