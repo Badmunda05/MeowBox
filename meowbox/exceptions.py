@@ -11,3 +11,4 @@ class UploadError(MeowBoxException):
 
 class DeleteError(MeowBoxException):
     pass
+    
