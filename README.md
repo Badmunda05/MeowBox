@@ -13,6 +13,10 @@ supports both sync and async out of the box.
 ```bash
 pip install meowbox
 ```
+## Use for requirements.txt
+```bash
+meowbox==1.5
+```
 
 ---
 
