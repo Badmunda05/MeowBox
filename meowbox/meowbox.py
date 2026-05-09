@@ -7,28 +7,33 @@ Author : @BadmundaXd <munda.bad1322@gmail.com>
 
 import os
 import requests
-from .exceptions import MeowBoxException, UploadError, RateLimitError, DeleteError
+from .exceptions import (
+    MeowBoxException,
+    UploadError,
+    RateLimitError,
+    DeleteError,
+)
 
 MEOWBOX_URL = "https://files.tgvibes.online/upload"
 
 
 # ─────────────────────────────────────────────
-#  MeowBox Class (sync)
+#  MeowBox Class (sync + async)
 # ─────────────────────────────────────────────
 
 class MeowBox:
     """
-    MeowBox uploader — sync + async support.
+    Usage:
 
-    Usage (sync):
         from meowbox import MeowBox
+
         mb = MeowBox()
+
         urls = mb.upload("photo.jpg")
         print(urls[0])
 
-    Usage (async):
-        from meowbox import MeowBox
-        mb = MeowBox()
+    Async:
+
         urls = await mb.upload_async("photo.jpg")
         print(urls[0])
     """
@@ -37,11 +42,9 @@ class MeowBox:
         self.base_url = base_url
 
     def upload(self, f) -> list:
-        """Upload file(s) to MeowBox. Returns list of direct URLs."""
         return upload(f, base_url=self.base_url)
 
     async def upload_async(self, f) -> list:
-        """Async upload file(s) to MeowBox. Returns list of direct URLs."""
         from .meowbox_async import upload_async
         return await upload_async(f, base_url=self.base_url)
 
@@ -50,33 +53,29 @@ class MeowBox:
 
 
 # ─────────────────────────────────────────────
-#  Sync functions
+#  Sync Upload
 # ─────────────────────────────────────────────
 
 def upload(f, base_url: str = MEOWBOX_URL) -> list:
     """
-    Upload file(s) to MeowBox (sync).
+    Upload file(s) to MeowBox.
 
-    Args:
-        f: File path (str), file object, or list of either.
-        base_url: MeowBox upload endpoint.
+    Supports:
+    - file path
+    - file object
+    - list of files
 
     Returns:
-        list of direct URLs (str).
-
-    Raises:
-        UploadError: If upload fails.
-        RateLimitError: If rate limited.
-
-    Example:
-        from meowbox import upload
-        urls = upload("photo.jpg")
-        print(urls[0])  # https://files.tgvibes.online/AbCdEfGh.jpg
+        list[str]
     """
+
     files_input = [f] if not isinstance(f, (list, tuple)) else list(f)
+
     urls = []
 
     for item in files_input:
+
+        # ─── Open file ───────────────────────
         if isinstance(item, str):
             filename = os.path.basename(item)
             fobj = open(item, "rb")
@@ -87,28 +86,70 @@ def upload(f, base_url: str = MEOWBOX_URL) -> list:
             opened = False
 
         try:
+
+            # ─── Upload request ──────────────
             resp = requests.post(
                 base_url,
-                files={"files[]": (filename, fobj)},
-                timeout=120,
+
+                # FIXED FIELD NAME
+                files={
+                    "files": (filename, fobj)
+                },
+
+                # optional form data
+                data={
+                    "expiry": "never"
+                },
+
+                timeout=300,
             )
+
         finally:
             if opened:
                 fobj.close()
 
+        # ─── Rate limit ─────────────────────
         if resp.status_code == 429:
             raise RateLimitError()
 
+        # ─── Invalid response ───────────────
         try:
             data = resp.json()
         except Exception:
-            raise UploadError(f"Invalid response (HTTP {resp.status_code}): {resp.text[:200]}")
+            raise UploadError(
+                f"Invalid response (HTTP {resp.status_code}): "
+                f"{resp.text[:300]}"
+            )
 
+        # ─── Upload failed ──────────────────
         if not data.get("success"):
-            raise UploadError(f"Upload failed: {data.get('description', 'Unknown error')}")
+            raise UploadError(
+                data.get("description")
+                or data.get("message")
+                or "Unknown upload error"
+            )
 
-        for file_info in data.get("files", []):
-            urls.append(file_info["url"])
+        # ─── Extract URLs ───────────────────
+        files_data = data.get("files", [])
+
+        if not files_data:
+            raise UploadError("No files returned from server")
+
+        for file_info in files_data:
+
+            # supports multiple response styles
+            url = (
+                file_info.get("url")
+                or file_info.get("link")
+                or file_info.get("src")
+            )
+
+            if not url:
+                continue
+
+            urls.append(url)
+
+    if not urls:
+        raise UploadError("Upload succeeded but no URL returned")
 
     return urls
-    
