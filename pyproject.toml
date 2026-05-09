@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meowbox"
+dynamic = ["version", "readme"]
+description = "MeowBox — Permanent file hosting uploader (sync & async)"
+requires-python = ">=3.7"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "BadmundaXd", email = "munda.bad1322@gmail.com" }
+]
+keywords = ["meowbox", "upload", "file hosting", "async", "httpx"]
+classifiers = [
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+]
+dependencies = ["requests", "httpx"]
+
+[project.optional-dependencies]
+async = ["httpx"]
+
+[project.urls]
+Homepage = "https://github.com/Badmunda05/MeowBox"
+Source   = "https://github.com/Badmunda05/MeowBox"
+Telegram = "https://t.me/BadmundaXd"
+
+[tool.setuptools]
+packages = ["meowbox"]
+
+[tool.setuptools.dynamic]
+version = { attr = "meowbox.__version__" }
+readme  = { file = ["README.md"], content-type = "text/markdown" }
