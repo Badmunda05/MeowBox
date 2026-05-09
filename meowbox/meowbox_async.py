@@ -15,32 +15,29 @@ async def upload_async(f, base_url: str = MEOWBOX_URL) -> list:
     """
     Async upload file(s) to MeowBox using httpx.
 
-    Args:
-        f: File path (str), file object, or list of either.
-        base_url: MeowBox upload endpoint.
+    Supports:
+    - file path
+    - file object
+    - multiple files
 
     Returns:
-        list of direct URLs (str).
-
-    Raises:
-        UploadError: If upload fails.
-        RateLimitError: If rate limited.
-
-    Example:
-        from meowbox.meowbox_async import upload_async
-        urls = await upload_async("photo.jpg")
-        print(urls[0])  # https://files.tgvibes.online/AbCdEfGh.jpg
+        list[str]
     """
+
     try:
         import httpx
     except ImportError:
         raise ImportError("httpx is required: pip install httpx")
 
     files_input = [f] if not isinstance(f, (list, tuple)) else list(f)
+
     urls = []
 
-    async with httpx.AsyncClient(timeout=120) as client:
+    async with httpx.AsyncClient(timeout=300) as client:
+
         for item in files_input:
+
+            # ─── Open file ───────────────────
             if isinstance(item, str):
                 filename = os.path.basename(item)
                 fobj = open(item, "rb")
@@ -51,27 +48,67 @@ async def upload_async(f, base_url: str = MEOWBOX_URL) -> list:
                 opened = False
 
             try:
+
+                # ─── Upload request ──────────
                 resp = await client.post(
                     base_url,
-                    files={"files[]": (filename, fobj)},
+
+                    # FIXED FIELD NAME
+                    files={
+                        "files": (filename, fobj)
+                    },
+
+                    # optional form data
+                    data={
+                        "expiry": "never"
+                    },
                 )
+
             finally:
                 if opened:
                     fobj.close()
 
+            # ─── Rate limit ─────────────────
             if resp.status_code == 429:
                 raise RateLimitError()
 
+            # ─── Parse response ─────────────
             try:
                 data = resp.json()
             except Exception:
-                raise UploadError(f"Invalid response (HTTP {resp.status_code}): {resp.text[:200]}")
+                raise UploadError(
+                    f"Invalid response (HTTP {resp.status_code}): "
+                    f"{resp.text[:300]}"
+                )
 
+            # ─── Upload failed ──────────────
             if not data.get("success"):
-                raise UploadError(f"Upload failed: {data.get('description', 'Unknown error')}")
+                raise UploadError(
+                    data.get("description")
+                    or data.get("message")
+                    or "Unknown upload error"
+                )
 
-            for file_info in data.get("files", []):
-                urls.append(file_info["url"])
+            # ─── Extract URLs ───────────────
+            files_data = data.get("files", [])
+
+            if not files_data:
+                raise UploadError("No files returned from server")
+
+            for file_info in files_data:
+
+                url = (
+                    file_info.get("url")
+                    or file_info.get("link")
+                    or file_info.get("src")
+                )
+
+                if not url:
+                    continue
+
+                urls.append(url)
+
+    if not urls:
+        raise UploadError("Upload succeeded but no URL returned")
 
     return urls
-                           
