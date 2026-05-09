@@ -40,7 +40,7 @@ Features
 ✓ Telegram bot friendly
 """
 
-__version__ = "2.5"
+__version__ = "1.5"
 
 __author__ = "@BadmundaXd"
 
